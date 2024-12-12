@@ -65,3 +65,11 @@ cd api && npm run test
 ![Ops Flow 01](flow-01.jpg)
 ![Ops Flow 02](flow-02.jpg)
 ![Ops Flow 03](flow-03.jpg)
+
+## Contributing
+
+Feel free to open issues and pull requests for any improvements or bug fixes.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
