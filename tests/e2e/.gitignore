@@ -1,0 +1,26 @@
+# e2e tests
+
+# Cypress specific files
+cypress/videos/
+cypress/screenshots/
+
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Build directories
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.temp
+
+# IDE and editor specific files
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -1,0 +1,32 @@
+# Golang
+
+# Go binary files
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go workspace files
+*.test
+*.out
+*.prof
+
+# Go module files
+vendor/
+Gopkg.lock
+
+# IDE and editor specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Build directories
+bin/
+build/
+dist/
