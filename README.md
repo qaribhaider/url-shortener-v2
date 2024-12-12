@@ -37,7 +37,11 @@ To run this project, you will need to have Docker installed on your local machin
 To start the application, use:
 
 ```bash
+# For development
 docker-compose -f docker-compose.dev.yml up --build
+
+# Mimick production
+docker-compose -f docker-compose.prod.yml up --build
 ```
 
 With default configuration, you can access
@@ -58,6 +62,21 @@ To run the api `unit` tests:
 
 ```bash
 cd api && npm run test
+```
+
+## Tear down
+
+To take down the application containers, use:
+
+```bash
+# Development
+docker-compose -f docker-compose.dev.yml down
+
+# Production
+docker-compose -f docker-compose.prod.yml down
+
+# e2e Test
+docker-compose -f docker-compose.e2e.yml down
 ```
 
 ## Ops Flow

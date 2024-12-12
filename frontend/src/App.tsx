@@ -1,10 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
-import { ApiService } from './services/api.service';
-import { appTitle } from './utils/config';
+import { useState, useRef, useEffect } from "react";
+import { ApiService } from "./services/api.service";
+import { appTitle } from "./utils/config";
+
+const API_REDIRECTOR_URL =
+  import.meta.env.VITE_SHORTENER_REDIRECTOR_URL || "http://localhost:8080";
 
 function App() {
-  const [url, setUrl] = useState('');
-  const [shortCode, setShortCode] = useState('');
+  const [url, setUrl] = useState("");
+  const [shortCode, setShortCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,14 +28,14 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      setShortCode('');
+      setShortCode("");
       const response = await apiService.shortenUrl(urlToShorten);
       setShortCode(response.shortCode);
     } catch (err: any) {
       if (err?.message) {
         setError(err.message);
       } else {
-        setError('An unexpected error occurred. Please try again.');
+        setError("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -44,7 +47,7 @@ function App() {
     shortenUrl(url);
   };
 
-  const shortUrl = shortCode ? `${import.meta.env.VITE_SHORTENER_REDIRECTOR_URL}/${shortCode}` : '';
+  const shortUrl = shortCode ? `${API_REDIRECTOR_URL}/${shortCode}` : "";
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-white p-4 w-full max-w-3xl">
@@ -72,17 +75,25 @@ function App() {
 
         <button
           type="submit"
-          className={`w-full p-3 rounded-md bg-blue-600 hover:bg-blue-500 text-white ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`w-full p-3 rounded-md bg-blue-600 hover:bg-blue-500 text-white ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
           disabled={!url || loading}
         >
-          {loading ? 'Shortening...' : 'Shorten URL'}
+          {loading ? "Shortening..." : "Shorten URL"}
         </button>
 
         {shortCode && (
           <div className="mt-6 p-4 bg-gray-800 rounded-md text-center">
             <span className="text-lg font-semibold">Your shortened URL:</span>
             <div className="flex items-center justify-center mt-2 bg-gray-700 p-2 rounded-md">
-              <a href={shortUrl} target="_blank" className="text-blue-400 hover:underline">{shortUrl}</a>
+              <a
+                href={shortUrl}
+                target="_blank"
+                className="text-blue-400 hover:underline"
+              >
+                {shortUrl}
+              </a>
             </div>
           </div>
         )}

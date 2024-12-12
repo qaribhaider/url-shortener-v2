@@ -1,55 +1,57 @@
-# Base image for all stages
+#### Base image for all stages
 FROM node:22-alpine AS base
 
 WORKDIR /usr/src/app
 
 # Install curl for healthcheck
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl 
 
-# Copy package files for dependency installation
 COPY package*.json ./
 
-# Development Stage
+RUN npm install
+
+COPY . .
+
+#### Development Stage
 FROM base AS development
 
-# Install all dependencies (including devDependencies)
-RUN npm install
-
-# Copy source code for development
-COPY . .
-
-# Expose port for development
 EXPOSE 3000
 
-# Command for development
 CMD ["npm", "run", "start:dev"]
 
-# Testing Stage
+#### Testing Stage
 FROM base AS test
 
-# Install all dependencies (including devDependencies)
 RUN npm install
 
-# Copy source code for testing
-COPY . .
-
-# Command for running tests
 CMD ["npm", "run", "test"]
 
-# Production Stage
-FROM base AS production
+#### Build Stage
+FROM node:22-alpine AS build
 
-# Install only production dependencies
-RUN npm install --only=production
+WORKDIR /usr/src/app
 
-# Copy source code for production
+COPY package*.json ./
+COPY --from=base /usr/src/app/node_modules ./node_modules
 COPY . .
 
-# Build the application
 RUN npm run build
 
-# Expose port for production
+# Install again with dev dependencies removed
+RUN npm ci --omit=dev && npm cache clean --force
+
+#### Production Stage
+FROM build AS production
+
+WORKDIR /usr/src/app
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl 
+
+COPY --from=build /usr/src/app/node_modules ./node_modules
+COPY --from=build /usr/src/app/dist ./dist
+COPY package*.json ./
+
 EXPOSE 3000
 
-# Command for starting the application in production mode
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main"]

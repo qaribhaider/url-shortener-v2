@@ -7,14 +7,23 @@ export const LoggerConfig = LoggerModule.forRootAsync({
   useFactory: (config: ConfigService<AppConfig>) => {
     const isDevelopment = config.get('environment') === 'development';
 
-    return {
+    const pinoConfig = {
       pinoHttp: {
         level: config.get('logLevel'),
-        transport: {
+        customProps: (req) => {
+          return {
+            traceId: req['traceId'],
+          };
+        },
+      },
+    };
+
+    if (isDevelopment) {
+      pinoConfig.pinoHttp['transport'] = {
           target: 'pino-pretty',
           options: {
             singleLine: true,
-            colorize: isDevelopment,
+            colorize: true,
             levelFirst: true,
             translateTime: 'yyyy-mm-dd HH:MM:ss',
             messageFormat: '{msg}',
@@ -30,13 +39,9 @@ export const LoggerConfig = LoggerModule.forRootAsync({
             },
             useOnlyCustomProps: true,
           },
-        },
-        customProps: (req) => {
-          return {
-            traceId: req['traceId'],
-          };
-        },
-      },
-    };
+        };
+    }
+
+    return pinoConfig;
   },
 });

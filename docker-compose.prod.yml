@@ -1,0 +1,108 @@
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: production
+    container_name: url-shortener-api
+    ports:
+      - "3010:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - LOG_LEVEL=error
+      - ENVIRONMENT=production
+      - NO_COLOR=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ETCD_HOSTS=http://etcd:2379
+      - MONGODB_URI=mongodb://mongodb:27017/url-shortener
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      redis:
+        condition: service_healthy
+      etcd:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+
+  redirector:
+    build:
+      context: ./redirector
+      dockerfile: Dockerfile
+    container_name: url-shortener-redirector
+    ports:
+      - "8080:8080"
+    environment:
+      - API_BASE_URL=http://api:3000 # API base URL
+      - PORT=8080 # Service port
+    depends_on:
+      api:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: url-shortener-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_SHORTENER_API_URL=http://localhost:3010
+      - VITE_SHORTENER_REDIRECTOR_URL=http://localhost:8080
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+
+  mongodb:
+    image: mongo:7
+    container_name: url-shortener-mongodb
+    ports:
+      - "27018:27017"
+    command: ["mongod", "--quiet", "--logpath", "/dev/null"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    volumes:
+      - db_mongo_data_shortener_v2:/data/db
+
+  etcd:
+    image: bitnami/etcd:3.5
+    container_name: url-shortener-etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  redis:
+    image: redis:7
+    container_name: url-shortener-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  db_mongo_data_shortener_v2:

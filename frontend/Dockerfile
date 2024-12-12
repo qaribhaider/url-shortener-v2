@@ -31,19 +31,11 @@ COPY . .
 RUN npm run build
 
 # Production Stage
-FROM node:22-alpine AS production
+FROM nginx:stable-alpine AS production
 
-WORKDIR /app
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /var/www/html/
 
-# Copy only the built files and package files
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/package*.json ./
-
-# Install only production dependencies
-RUN npm install --only=production
-
-# Expose port for production
 EXPOSE 5173
 
-# Command for starting the application
-CMD ["npm", "run", "preview"]
+ENTRYPOINT ["nginx","-g","daemon off;"]
