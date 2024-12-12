@@ -37,7 +37,7 @@ To run this project, you will need to have Docker installed on your local machin
 To start the application, use:
 
 ```bash
-docker-compose up --build
+docker-compose -f docker-compose.dev.yml up --build
 ```
 
 With default configuration, you can access
