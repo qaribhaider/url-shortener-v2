@@ -1,1 +1,1 @@
-- [] Add production ready images and compose config
+- [x] Add production ready images and compose config
